@@ -41,6 +41,7 @@ export async function buscarAluno(req, res) {
 
 // 🎯 POST /alunos — cria um novo aluno
 export async function criarAluno(req, res) {
+
   const {
     nome,
     email,
