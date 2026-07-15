@@ -15,59 +15,69 @@ const selectSemSenha = {
 };
 
 // GET /alunos — lista todos os alunos
-export async function listarAlunos(req, res) {
-  const alunos = await prisma.aluno.findMany({
-    select: selectSemSenha,
-  });
-
-  res.json(alunos);
+export async function listarAlunos(req, res, next) {
+  try {
+    const alunos = await prisma.aluno.findMany({
+      select: selectSemSenha,
+    });
+    res.json(alunos);
+  } catch (erro) {
+    next(erro);
+  }
 }
 
 // GET /alunos/:id — busca um aluno pelo ID
-export async function buscarAluno(req, res) {
-  const { id } = req.params;
+export async function buscarAluno(req, res, next) {
+  try {
+    const { id } = req.params;
 
-  const aluno = await prisma.aluno.findUnique({
-    where: { id: Number(id) },
-    select: selectSemSenha,
-  });
+    const aluno = await prisma.aluno.findUnique({
+      where: { id: Number(id) },
+      select: selectSemSenha,
+    });
 
-  if (!aluno) {
-    return res.status(404).json({ erro: 'Aluno não encontrado' });
+    if (!aluno) {
+      return res.status(404).json({ erro: 'Aluno não encontrado' });
+    }
+
+    res.json(aluno);
+  } catch (erro) {
+    next(erro);
   }
-
-  res.json(aluno);
 }
 
 // 🎯 POST /alunos — cria um novo aluno
-export async function criarAluno(req, res) {
-
-  const {
-    nome,
-    email,
-    senhaHash,
-    cidade,
-    frase,
-    planosFuturos,
-  } = req.body;
-
-  const alunoCriado = await prisma.aluno.create({
-    data: {
+export async function criarAluno(req, res, next) {
+  try {
+    const {
       nome,
       email,
       senhaHash,
       cidade,
       frase,
       planosFuturos,
-    },
-    select: selectSemSenha,
-  });
+    } = req.body;
 
-  return res.status(201).json(alunoCriado);
+    const alunoCriado = await prisma.aluno.create({
+      data: {
+        nome,
+        email,
+        senhaHash,
+        cidade,
+        frase,
+        planosFuturos,
+      },
+      select: selectSemSenha,
+    });
+
+    return res.status(201).json(alunoCriado);
+  } catch (erro) {
+    next(erro);
+  }
 }
 
 // 🎯 PUT /alunos/:id — atualiza um aluno existente
-export async function atualizarAluno(req, res) {
+export async function atualizarAluno(req, res, next) {
   const { id } = req.params;
   const dados = req.body;
 
@@ -89,7 +99,7 @@ export async function atualizarAluno(req, res) {
 }
 
 // 🎯 DELETE /alunos/:id — deleta um aluno
-export async function deletarAluno(req, res) {
+export async function deletarAluno(req, res, next) {
   const { id } = req.params;
 
   try {

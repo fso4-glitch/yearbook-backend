@@ -1,52 +1,60 @@
 import prisma from '../prisma/client.js';
 
 // GET /mensagens — lista todas as mensagens (mais recentes primeiro, com dados do autor)
-export async function listarMensagens(req, res) {
-  const mensagens = await prisma.mensagem.findMany({
-    orderBy: { criadoEm: 'desc' },
-    include: {
-      autor: {
-        select: {
-          nome: true,
-          fotoUrl: true,
+export async function listarMensagens(req, res, next) {
+  try {
+    const mensagens = await prisma.mensagem.findMany({
+      orderBy: { criadoEm: 'desc' },
+      include: {
+        autor: {
+          select: {
+            nome: true,
+            fotoUrl: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  res.json(mensagens);
+    res.json(mensagens);
+  } catch (erro) {
+    next(erro);
+  }
 }
 
 // POST /mensagens — cria uma nova mensagem
-export async function criarMensagem(req, res) {
-  const { texto, autorId } = req.body;
+export async function criarMensagem(req, res, next) {
+  try {
+    const { texto, autorId } = req.body;
 
-  if (!texto || texto.trim() === '') {
-    return res.status(400).json({
-      erro: 'Texto é obrigatório',
-    });
-  }
+    if (!texto || texto.trim() === '') {
+      return res.status(400).json({
+        erro: 'O campo texto é obrigatório',
+      });
+    }
 
-  const mensagem = await prisma.mensagem.create({
-    data: {
-      texto,
-      autorId: Number(autorId),
-    },
-    include: {
-      autor: {
-        select: {
-          nome: true,
-          fotoUrl: true,
+    const mensagem = await prisma.mensagem.create({
+      data: {
+        texto,
+        autorId: Number(autorId),
+      },
+      include: {
+        autor: {
+          select: {
+            nome: true,
+            fotoUrl: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  return res.status(201).json(mensagem);
+    return res.status(201).json(mensagem);
+  } catch (erro) {
+    next(erro);
+  }
 }
 
 // DELETE /mensagens/:id — deleta uma mensagem
-export async function deletarMensagem(req, res) {
+export async function deletarMensagem(req, res, next) {
   const { id } = req.params;
 
   try {
